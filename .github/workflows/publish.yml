@@ -1,0 +1,36 @@
+name: 🚀 Deploy website on push
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  web-deploy:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x] # O la versión de Node.js que uses
+    steps:
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v4
+
+    - name: Install Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+      
+    - name: 🔨 Build Project
+      run: |
+        npm install
+        npm run build
+
+    - name: 📂 Sync files abelabed.com
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server:   abelabed.com
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./dist/
+        server-dir: /public_html/
